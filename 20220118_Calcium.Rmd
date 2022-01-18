@@ -1,0 +1,83 @@
+```{r setup}
+
+library(ggplotify)
+library(ggplot2)
+library(cowplot)
+library(tidyr)
+library(pracma)
+library(tidyverse)
+
+
+setwd("C:/Users/samN/Desktop/Working/temp_calc6CS3/")
+```
+
+```{r test basic heatmap}
+#csv is a matrix of values (X indicates frame number of time lapse video, and columns of individual neuron traces from ROIs including experiment and treatment values)
+#These have been normalized by hand and columns renamed
+
+cal4mergeA1A2E1E2 <- read.csv(file = "C:/Users/samN/Desktop/Working/20211201Cal4ReAnalysis/Merged/Cal4A1A2E1E2merge.csv")
+head(cal4mergeA1A2E1E2)
+
+cal4mergeA1A2E1E2b<-as.matrix(cal4mergeA1A2E1E2)
+cal4mergeA1A2E1E2c<-cal4mergeA1A2E1E2b[,-1]
+
+b<-heatmap(cal4mergeA1A2E1E2c, Rowv = NA, scale = 'none')
+ggsave("20211202_CAL4mergeA1A2E1E2hm.pdf", width = 54, height = 36, units ="cm")
+
+#This works well, but the bottleneck is the manual calculation of deltaF values which also involves an excel step (and is not scaleable)
+```
+
+
+
+```{r, norm attempt}
+#Here I want to try and take raw data and automate plotting AND deltaF calculations
+#load in a different toy dataset, no normalisation - these are raw values
+CS6B4<-read.csv(file="C:/Users/samN/Desktop/20211221_CS6_B7/CS6B7_B4nn.csv")
+
+CS6B4a<-CS6B4 %>%
+  gather(-Frame, key = "var", value = "value")
+
+head(CS6B4a)
+tail(CS6B4a)
+dim(CS6B4a)
+
+a<-CS6B4a %>%
+  ggplot(aes(x = Frame, y = value)) +
+    facet_wrap(~ var) +
+    geom_point(size = 0.5) 
+#this plots raw, output may be limited by n, where n = number of graphs to plot or individual traces
+ggsave("CS6B4b_raw.tiff", width = 54, height = 36, units ="cm")
+
+CS6B4b<-CS6B4a %>%
+   group_by(var) %>%
+   mutate(Col = value/first(value))
+
+
+b<-CS6B4b %>%
+  ggplot(aes(x = Frame, y = Col)) +
+    facet_wrap(~ var) +
+    geom_point(size = 0.5) 
+ggsave("CS6B7b_norm.tiff", width = 54, height = 36, units ="cm")
+
+plot_grid(a,b, labels = c("raw", "normalized"))
+
+
+
+```
+
+
+```{r assay dev}
+#I can count peaks
+#I can find peak
+
+
+###
+#Found a way to automate ROI selection --> Threshold--> Create selection-->Split selection-->Multi meaure, let's test this
+CS6B7_B5test<-read.csv(file="C:/Users/samN/Desktop/20211221_CS6_B7/CS6B7_B5_rawtestROIsegment.csv")
+
+
+
+```
+
+
+
